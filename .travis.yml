@@ -63,4 +63,5 @@ script:
   # - mpirun -np 4 ./modules/task_1/ndanilov_rows_matrix_sum/ndanilov_rows_matrix_sum 10 10
   # - mpirun -np 4 ./modules/task_1/Yunin_Ivan_maximum_elem_vector/Yunin_Ivan_maximum_elem_vector 100
   # - mpirun -np 4 ./modules/task_2/Gaidaichuk_Yuri_task2_Bubble_sorting/Gaidaichuk_Yuri_task2_Bubble_sorting 9
+  - mpirun -np 4 ./modules/task_2/nesterov_test_ocv/nesterov_test_ocv
   - mpirun -np 4 ./modules/task_2/Perov_Dima_task2_ProducerConsumer/Perov_Dima_task2_ProducerConsumer 10 5 5 1 2
