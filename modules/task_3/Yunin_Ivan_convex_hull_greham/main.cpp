@@ -7,8 +7,8 @@
 #include <cstdlib>
 #include <iostream>
 
-using namespace std; 
-  
+
+
 struct Point{
     int x;
     int y;
@@ -16,160 +16,160 @@ struct Point{
 
 // global because it is used in compare function) 
 Point p0; 
- int f = 0;
-void swap(Point &p1, Point &p2) { 
-    Point temp = p1; 
-    p1 = p2; 
-    p2 = temp; 
-} 
+int f = 0;
+void swap (Point &p1, Point &p2) {
+    Point temp = p1;
+    p1 = p2;
+    p2 = temp;
+}
 
 
 // Checks whether the line is crossing the polygon 
 int orientation(Point a, Point b, 
                 Point c) 
-{ 
+{
     int res = (b.y - a.y) * (c.x - b.x) - 
-              (c.y - b.y) * (b.x - a.x); 
-  
-    if (res == 0) 
-        return 0; 
-    if (res > 0) 
-        return 1; 
-    return -1; 
-} 
+              (c.y - b.y) * (b.x - a.x);
 
-int distance(Point p1, Point p2) { 
-    return (p1.x - p2.x)*(p1.x - p2.x) + 
-          (p1.y - p2.y)*(p1.y - p2.y); 
-} 
+    if (res == 0)
+        return 0;
+    if (res > 0)
+        return 1;
+    return -1; 
+}
+
+int distance(Point p1, Point p2) {
+    return (p1.x - p2.x)*(p1.x - p2.x) +
+          (p1.y - p2.y)*(p1.y - p2.y);
+}
 
 // compare function for sorting 
-int compare(const void *vp1, const void *vp2) { 
-    Point *p1 = (Point *)vp1; 
-    Point *p2 = (Point *)vp2; 
-    int o = orientation(p0, *p1, *p2); 
-    if (o == 0) 
-        if (distance(p0, *p2) >= distance(p0, *p1)) 
-            return -1; 
-        else return 1; 
+int compare(const void *vp1, const void *vp2) {
+    Point *p1 = (Point *)vp1;
+    Point *p2 = (Point *)vp2;
+    int o = orientation(p0, *p1, *p2);
+    if (o == 0)
+        if (distance(p0, *p2) >= distance(p0, *p1))
+            return -1;
+        else return 1;
     if (o == -1)
         return -1;
-    else return 1; 
+    else return 1;
 }
-  
-// Finds upper tangent of two polygons 'a' and 'b' 
+
+// Finds upper tangent of two polygons 'a' and 'b'
 // represented as two vectors. //rerurn size of vector
 int merger(Point *a, Point *b, Point *out, int size_a, int size_b) { 
-    // n1 -> number of points in polygon a 
-    // n2 -> number of points in polygon b 
+// n1 -> number of points in polygon a 
+// n2 -> number of points in polygon b 
     int n1 = size_a, n2 = size_b; 
-  
-    int ia = 0, ib = 0; 
-    for (int i = 1; i < n1; i++) 
-        if (a[i].x > a[ia].x) 
-            ia = i; 
-  
-    // ib -> leftmost point of b 
-    for (int i = 1; i<n2; i++) 
-        if (b[i].x < b[ib].x) 
-            ib=i; 
-  
-    // finding the upper tangent 
-    int inda = ia, indb = ib; 
-    bool done = 0; 
-    while (!done) { 
-        done = 1; 
-        while (orientation(b[indb], a[inda],
-						   a[(inda+1)%n1]) >= 0) 
-            inda = (inda + 1) % n1; 
-  
-        while (orientation(a[inda], b[indb], 
-						   b[(n2+indb-1)%n2]) <= 0) { 
-            indb = (n2+indb-1)%n2; 
-            done = 0; 
-        } 
-    } 
-  
-    int uppera = inda, upperb = indb; 
-    inda = ia, indb=ib; 
-    done = 0; 
-    int g = 0; 
-    while (!done) { 
-        done = 1; 
-        while (orientation(a[inda], b[indb], b[(indb+1)%n2]) >= 0) 
-            indb = (indb+1)%n2; 
-  
-        while (orientation(b[indb], a[inda], a[(n1+inda-1)%n1]) <= 0) { 
-            inda = (n1+inda-1)%n1; 
-            done = 0; 
-        } 
-    } 
-  
-    int lowera = inda, lowerb = indb; 
- 
-    int ind = uppera;
-    int out_size = -1; 
-    out[++out_size] = a[uppera]; 
-    while (ind != lowera) { 
-        ind = (ind+1)%n1; 
-        out[++out_size] = a[ind]; 
-    } 
-  
-    ind = lowerb; 
-    out[++out_size] = b[lowerb]; 
-    while (ind != upperb) { 
-        ind = (ind+1)%n2; 
-        out[++out_size] = b[ind]; 
-    } 
-    return out_size+1; 
-  
-} 
-  
-int convex_hull(Point *points,Point *out, int size) {
-   int ymin = points[0].y, min = 0; 
-   int n = size;    
-   for (int i = 1; i < n; i++) { 
-     int y = points[i].y; 
-     if ((y < ymin) || (ymin == y && 
-         points[i].x < points[min].x)) 
-        ymin = points[i].y, min = i; 
-   } 
-   swap(points[0], points[min]);
-//   std::cout << "begin:\n";    
-   p0 = points[0]; 
-   qsort(&points[1], n-1, sizeof(Point), compare);  
-//   std::cout << "after qsort:\n";      
-   int m = 1;
-   for (int i = 1; i < n; i++) { 
-       while (i < n-1 && orientation(p0, points[i], 
-                                    points[i+1]) == 0) 
-          i++; 
-       points[m] = points[i]; 
-       m++; 
-   } 
-//  std::cout << "afrer eql points:\n";  
-   if (m < 3) return 0; 
-   int out_size = -1; 
-   out[++out_size] = points[0]; 
-   out[++out_size] = points[1];
-   out[++out_size] = points[2]; 
-   for (int i = 3; i < m; i++) { 
-      while (orientation(out[out_size-1], out[out_size], points[i]) != -1) 
-         --out_size;//S.pop_back(); 
-      out[++out_size] = points[i]; 
-   } 
-//  std::cout << "after main while:\n";  
-   return out_size+1;
- 
-} 
 
-int compare_X(const void *vp1, const void *vp2) { 
-    Point *p1 = (Point *)vp1; 
-    Point *p2 = (Point *)vp2; 
+    int ia = 0, ib = 0;
+    for (int i = 1; i < n1; i++)
+        if (a[i].x > a[ia].x)
+            ia = i;
+
+    // ib -> leftmost point of b
+    for (int i = 1; i<n2; i++)
+        if (b[i].x < b[ib].x)
+            ib=i;
+
+// finding the upper tangent 
+    int inda = ia, indb = ib;
+    bool done = 0;
+    while (!done) {
+        done = 1;
+        while (orientation(b[indb], a[inda],
+						   a[(inda+1)%n1]) >= 0)
+            inda = (inda + 1) % n1;
+
+        while (orientation(a[inda], b[indb],
+						   b[(n2+indb-1)%n2]) <= 0) {
+            indb = (n2+indb-1)%n2;
+            done = 0;
+        }
+    }
+
+    int uppera = inda, upperb = indb;
+    inda = ia, indb=ib;
+    done = 0;
+    int g = 0;
+    while (!done) {
+        done = 1;
+        while (orientation(a[inda], b[indb], b[(indb+1)%n2]) >= 0)
+            indb = (indb+1)%n2;
+
+        while (orientation(b[indb], a[inda], a[(n1+inda-1)%n1]) <= 0) { 
+            inda = (n1+inda-1)%n1;
+            done = 0;
+        }
+    }
+
+    int lowera = inda, lowerb = indb;
+
+    int ind = uppera;
+    int out_size = -1;
+    out[++out_size] = a[uppera];
+    while (ind != lowera) {
+        ind = (ind+1)%n1;
+        out[++out_size] = a[ind];
+    }
+
+    ind = lowerb;
+    out[++out_size] = b[lowerb];
+    while (ind != upperb) {
+        ind = (ind+1)%n2;
+        out[++out_size] = b[ind];
+    }
+    return out_size+1;
+
+}
+
+int convex_hull(Point *points,Point *out, int size) {
+   int ymin = points[0].y, min = 0;
+   int n = size;
+   for (int i = 1; i < n; i++) {
+     int y = points[i].y;
+     if ((y < ymin) || (ymin == y &&
+         points[i].x < points[min].x))
+        ymin = points[i].y, min = i;
+   }
+   swap(points[0], points[min]);
+//   std::cout << "begin:\n";
+   p0 = points[0];
+   qsort(&points[1], n-1, sizeof(Point), compare);
+//   std::cout << "after qsort:\n";
+   int m = 1;
+   for (int i = 1; i < n; i++) {
+       while (i < n-1 && orientation(p0, points[i],
+                                    points[i+1]) == 0)
+          i++;
+       points[m] = points[i];
+       m++;
+   }
+//  std::cout << "afrer eql points:\n";  
+   if (m < 3) return 0;
+   int out_size = -1;
+   out[++out_size] = points[0];
+   out[++out_size] = points[1];
+   out[++out_size] = points[2];
+   for (int i = 3; i < m; i++) {
+      while (orientation(out[out_size-1], out[out_size], points[i]) != -1)
+         --out_size;//S.pop_back();
+      out[++out_size] = points[i];
+   }
+//  std::cout << "after main while:\n";
+   return out_size+1;
+
+}
+
+int compare_X(const void *vp1, const void *vp2) {
+    Point *p1 = (Point *)vp1;
+    Point *p2 = (Point *)vp2;
     return ( p1->x - p2->x );
 }
 
-void init_map(Point * res,int n,int u_bound,int l_bound){
+void init_map(Point * res,int n,int u_bound,int l_bound) {
     Point p;
     for (int i = 0; i < n; i++){
         p.y = 1+rand()%(u_bound/10-1);
@@ -206,14 +206,14 @@ int main(int argc, char*argv[]) {
     MPI_Address(&(for_disp.y), &addresses[2]);
     disp[0] = addresses[1] - addresses[0];
     disp[1] = addresses[2] - addresses[0];
-    
+
     MPI_Type_create_struct(2, blocklen, disp, type, &PNT);
-    MPI_Type_commit(&PNT); 
+    MPI_Type_commit(&PNT);
     MPI_Comm_size(MPI_COMM_WORLD, &proc_num);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_id);
-    //sub_num_p = static_cast<int>(ceil(static_cast<double>(num_p)/
-     //                                   (static_cast<double>(proc_num))));
-    
+//sub_num_p = static_cast<int>(ceil(static_cast<double>(num_p)/
+//                                   (static_cast<double>(proc_num))));
+
     //int hull_sizes[proc_num];
     sub_num_p = num_p/proc_num;
     int tail = num_p%proc_num;
@@ -230,12 +230,12 @@ int main(int argc, char*argv[]) {
         for (int i = 0; i < num_p; i++)
         points2[i] = points[i];
         s_time_start = MPI_Wtime();
-        seq_res_size = convex_hull(points, seq_res, num_p); 
+        seq_res_size = convex_hull(points, seq_res, num_p);
 		s_time_finish = MPI_Wtime();
         if ( seq_res_size<15){
             for (int i = 0; i < seq_res_size; i++)
             std::cout << seq_res[i].x << ";"
-             << seq_res[i].y << std::endl; 
+             << seq_res[i].y << std::endl;
         }
         qsort(&points2[0], num_p, sizeof(Point), compare_X);
     }
@@ -281,5 +281,5 @@ int main(int argc, char*argv[]) {
     if ( sub_res    != NULL ) { delete[]sub_res;    }
     if ( points2    != NULL ) { delete[]points2;    }
     MPI_Finalize();
-    return 0; 
-} 
+    return 0;
+}
