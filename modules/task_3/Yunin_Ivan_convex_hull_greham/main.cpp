@@ -17,7 +17,7 @@ struct Point{
 // global because it is used in compare function)
 Point p0;
 int f = 0;
-void swap (Point &p1, Point &p2){
+void swap(Point &p1, Point &p2) {
     Point temp = p1;
     p1 = p2;
     p2 = temp;
@@ -26,8 +26,7 @@ void swap (Point &p1, Point &p2){
 
 // Checks whether the line is crossing the polygon
 int orientation(Point a, Point b,
-                Point c)
-{
+                Point c) {
     int res = (b.y - a.y) * (c.x - b.x) -
               (c.y - b.y) * (b.x - a.x);
 
@@ -43,23 +42,24 @@ int distance(Point p1, Point p2) {
           (p1.y - p2.y)*(p1.y - p2.y);
 }
 
-//compare function for sorting
+// compare function for sorting
 int compare(const void *vp1, const void *vp2) {
     Point *p1 = reinterpret_cast<Point *>(vp1);
     Point *p2 = reinterpret_cast<Point *>(vp2);
     int o = orientation(p0, *p1, *p2);
     if (o == 0)
         if (distance(p0, *p2) >= distance(p0, *p1))
-            return -1;
-    else return 1;
+                return -1;
+        else
+                return 1;
     if (o == -1)
         return -1;
     else return 1;
 }
 
-//Finds upper tangent of two polygons 'a' and 'b'
-//represented as two vectors. //rerurn size of vector
-int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
+// Finds upper tangent of two polygons 'a' and 'b'
+// represented as two vectors. //rerurn size of vector
+int merger(Point *a, Point *b, Point *out, int size_a, int size_b) {
 // n1 -> number of points in polygon a
 // n2 -> number of points in polygon b
     int n1 = size_a, n2 = size_b;
@@ -69,12 +69,12 @@ int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
         if (a[i].x > a[ia].x)
             ia = i;
 
-//ib -> leftmost point of b
+// ib -> leftmost point of b
     for (int i = 1; i < n2; i++)
         if (b[i].x < b[ib].x)
             ib = i;
 
-//finding the upper tangent
+// finding the upper tangent
     int inda = ia, indb = ib;
     bool done = 0;
     while (!done) {
@@ -82,14 +82,12 @@ int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
         while (orientation(b[indb], a[inda],
                a[(inda+1)%n1]) >= 0)
             inda = (inda + 1) % n1;
-
         while (orientation(a[inda], b[indb],
                b[(n2+indb-1)%n2]) <= 0) {
             indb = (n2+indb-1)%n2;
             done = 0;
         }
     }
-
     int uppera = inda, upperb = indb;
     inda = ia, indb=ib;
     done = 0;
@@ -98,15 +96,12 @@ int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
         done = 1;
         while (orientation(a[inda], b[indb], b[(indb+1)%n2]) >= 0)
             indb = (indb+1)%n2;
-
         while (orientation(b[indb], a[inda], a[(n1+inda-1)%n1]) <= 0) { 
             inda = (n1+inda-1)%n1;
             done = 0;
         }
     }
-
     int lowera = inda, lowerb = indb;
-
     int ind = uppera;
     int out_size = -1;
     out[++out_size] = a[uppera];
@@ -125,47 +120,47 @@ int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
 
 }
 
-int convex_hull(Point *points,Point *out, int size) {
-   int ymin = points[0].y, min = 0;
-   int n = size;
-   for (int i = 1; i < n; i++) {
-     int y = points[i].y;
-     if ((y < ymin) || (ymin == y &&
-         points[i].x < points[min].x))
-        ymin = points[i].y, min = i;
-   }
-   swap(points[0], points[min]);
-//   std::cout << "begin:\n";
-   p0 = points[0];
-   qsort(&points[1], n-1, sizeof(Point), compare);
-//   std::cout << "after qsort:\n";
-   int m = 1;
-   for (int i = 1; i < n; i++) {
-       while (i < n-1 && orientation(p0, points[i],
-                                    points[i+1]) == 0)
-          i++;
-       points[m] = points[i];
-       m++;
-   }
+int convex_hull(Point *points, Point *out, int size) {
+    int ymin = points[0].y, min = 0;
+    int n = size;
+    for (int i = 1; i < n; i++) {
+      int y = points[i].y;
+      if ((y < ymin) || (ymin == y &&
+          points[i].x < points[min].x))
+         ymin = points[i].y, min = i;
+    }
+    swap(points[0], points[min]);
+// std::cout << "begin:\n";
+    p0 = points[0];
+    qsort(&points[1], n-1, sizeof(Point), compare);
+ //   std::cout << "after qsort:\n";
+    int m = 1;
+    for (int i = 1; i < n; i++) {
+        while (i < n-1 && orientation(p0, points[i],
+                                     points[i+1]) == 0)
+           i++;
+        points[m] = points[i];
+        m++;
+    }
 //  std::cout << "afrer eql points:\n";  
-   if (m < 3) return 0;
-   int out_size = -1;
-   out[++out_size] = points[0];
-   out[++out_size] = points[1];
-   out[++out_size] = points[2];
-   for (int i = 3; i < m; i++) {
-      while (orientation(out[out_size-1], out[out_size], points[i]) != -1)
-         --out_size;//S.pop_back();
-      out[++out_size] = points[i];
-   }
-//  std::cout << "after main while:\n";
-   return out_size+1;
+    if (m < 3) return 0;
+    int out_size = -1;
+    out[++out_size] = points[0];
+    out[++out_size] = points[1];
+    out[++out_size] = points[2];
+    for (int i = 3; i < m; i++) {
+       while (orientation(out[out_size-1], out[out_size], points[i]) != -1)
+          --out_size;
+       out[++out_size] = points[i];
+    }
+// std::cout << "after main while:\n";
+    return out_size+1;
 
 }
 
 int compare_X(const void *vp1, const void *vp2) {
-    Point *p1 = (Point *)vp1;
-    Point *p2 = (Point *)vp2;
+    Point *p1 = reinterpret_cast<Point *>(vp1);
+    Point *p2 = reinterpret_cast<Point *>(vp2);
     return ( p1->x - p2->x );
 }
 
@@ -211,10 +206,8 @@ int main(int argc, char*argv[]) {
     MPI_Type_commit(&PNT);
     MPI_Comm_size(MPI_COMM_WORLD, &proc_num);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_id);
-//sub_num_p = static_cast<int>(ceil(static_cast<double>(num_p)/
-//                                   (static_cast<double>(proc_num))));
 
-    //int hull_sizes[proc_num];
+    // int hull_sizes[proc_num];
     sub_num_p = num_p/proc_num;
     int tail = num_p%proc_num;
     int sub_res_size[proc_num];
@@ -231,8 +224,8 @@ int main(int argc, char*argv[]) {
         points2[i] = points[i];
         s_time_start = MPI_Wtime();
         seq_res_size = convex_hull(points, seq_res, num_p);
-		s_time_finish = MPI_Wtime();
-        if ( seq_res_size<15){
+        s_time_finish = MPI_Wtime();
+        if ( seq_res_size < 15) {
             for (int i = 0; i < seq_res_size; i++)
             std::cout << seq_res[i].x << ";"
              << seq_res[i].y << std::endl;
@@ -249,32 +242,32 @@ int main(int argc, char*argv[]) {
     MPI_Gather(sub_res, sub_num_p, PNT, par_res, sub_num_p, PNT,0,
 			   MPI_COMM_WORLD);
 	MPI_Barrier(MPI_COMM_WORLD);
-    if (proc_id==0){
+    if (proc_id==0) {
         int flag;
         int shift = 0;
-        int for_merge_size[2]={ num_p, num_p };
+        int for_merge_size[2] = { num_p, num_p };
         for_merge[0] = new Point[num_p];
         for_merge_size[0] =  merger(par_res, par_res+sub_num_p, for_merge[0],
-									sub_res_size[0], sub_res_size[1]); 
+                                    sub_res_size[0], sub_res_size[1]); 
         for_merge[1] = new Point[num_p];
         shift+=sub_num_p;
-        for (int i = 1; i <proc_num-1; i++){
-            shift+=sub_num_p;
+        for (int i = 1; i < proc_num-1; i++) {
+            shift += sub_num_p;
             for_merge_size[i%2] = merger(for_merge[(i+1)%2], par_res + shift,
-										 for_merge[i%2], for_merge_size[(i+1)%2], sub_res_size[i+1]); 
+                                         for_merge[i%2], for_merge_size[(i+1)%2], sub_res_size[i+1]); 
             flag = i%2;
         }
         p_time_finish = MPI_Wtime();
-        std::cout<<"seq "<<s_time_finish - s_time_start<<std::endl;
-        std::cout<<"par "<<p_time_finish - p_time_start<<std::endl;
-      //if( for_merge_size[flag] < 10 ){
-      //std::cout<<"par"<<std::endl;
-      //for (int i = 0; i < for_merge_size[flag]; i++)
+        std::cout << "seq " << s_time_finish - s_time_start << std::endl;
+        std::cout << "par " << p_time_finish - p_time_start << std::endl;
+      // if( for_merge_size[flag] < 10 ){
+      // std::cout<<"par"<<std::endl;
+      // for (int i = 0; i < for_merge_size[flag]; i++)
       //     std::cout << for_merge[flag][i].x << ";"
       //     << for_merge[flag][i].y << std::endl;
       //}
     }
-	if ( points     != NULL ) { delete[]points;     }
+    if ( points     != NULL ) { delete[]points;     }
     if ( seq_res    != NULL ) { delete[]seq_res;    }
     if ( par_res    != NULL ) { delete[]par_res;    }
     if ( sub_points != NULL ) { delete[]sub_points; }
