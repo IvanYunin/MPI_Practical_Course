@@ -14,28 +14,28 @@ struct Point{
     int y;
 };
 
-// global because it is used in compare function) 
-Point p0; 
+// global because it is used in compare function)
+Point p0;
 int f = 0;
-void swap (Point &p1, Point &p2) {
+void swap (Point &p1, Point &p2){
     Point temp = p1;
     p1 = p2;
     p2 = temp;
 }
 
 
-// Checks whether the line is crossing the polygon 
-int orientation(Point a, Point b, 
-                Point c) 
+// Checks whether the line is crossing the polygon
+int orientation(Point a, Point b,
+                Point c)
 {
-    int res = (b.y - a.y) * (c.x - b.x) - 
+    int res = (b.y - a.y) * (c.x - b.x) -
               (c.y - b.y) * (b.x - a.x);
 
     if (res == 0)
         return 0;
     if (res > 0)
         return 1;
-    return -1; 
+    return -1;
 }
 
 int distance(Point p1, Point p2) {
@@ -43,48 +43,48 @@ int distance(Point p1, Point p2) {
           (p1.y - p2.y)*(p1.y - p2.y);
 }
 
-// compare function for sorting 
+//compare function for sorting
 int compare(const void *vp1, const void *vp2) {
-    Point *p1 = (Point *)vp1;
-    Point *p2 = (Point *)vp2;
+    Point *p1 = reinterpret_cast<Point *>(vp1);
+    Point *p2 = reinterpret_cast<Point *>(vp2);
     int o = orientation(p0, *p1, *p2);
     if (o == 0)
         if (distance(p0, *p2) >= distance(p0, *p1))
             return -1;
-        else return 1;
+    else return 1;
     if (o == -1)
         return -1;
     else return 1;
 }
 
-// Finds upper tangent of two polygons 'a' and 'b'
-// represented as two vectors. //rerurn size of vector
-int merger(Point *a, Point *b, Point *out, int size_a, int size_b) { 
-// n1 -> number of points in polygon a 
-// n2 -> number of points in polygon b 
-    int n1 = size_a, n2 = size_b; 
+//Finds upper tangent of two polygons 'a' and 'b'
+//represented as two vectors. //rerurn size of vector
+int merger(Point *a, Point *b, Point *out, int size_a, int size_b){
+// n1 -> number of points in polygon a
+// n2 -> number of points in polygon b
+    int n1 = size_a, n2 = size_b;
 
     int ia = 0, ib = 0;
     for (int i = 1; i < n1; i++)
         if (a[i].x > a[ia].x)
             ia = i;
 
-    // ib -> leftmost point of b
-    for (int i = 1; i<n2; i++)
+//ib -> leftmost point of b
+    for (int i = 1; i < n2; i++)
         if (b[i].x < b[ib].x)
-            ib=i;
+            ib = i;
 
-// finding the upper tangent 
+//finding the upper tangent
     int inda = ia, indb = ib;
     bool done = 0;
     while (!done) {
         done = 1;
         while (orientation(b[indb], a[inda],
-						   a[(inda+1)%n1]) >= 0)
+               a[(inda+1)%n1]) >= 0)
             inda = (inda + 1) % n1;
 
         while (orientation(a[inda], b[indb],
-						   b[(n2+indb-1)%n2]) <= 0) {
+               b[(n2+indb-1)%n2]) <= 0) {
             indb = (n2+indb-1)%n2;
             done = 0;
         }
